@@ -1,0 +1,59 @@
+#!/bin/bash
+# This script uses the AWS CLI tools to initiate and monitor an OpsWorks application deployment
+# The AWS CLI tools expect ENV vars set for AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+# Expected arguments:
+## First to be aws region, ex: us-east-1
+## Second to be stack-id
+## Third to be application-id
+
+RETRY_LIMIT=30
+WAIT_TIME=10s
+RETRY_COUNT=0
+SUCCESS=0
+LAST_STATUS=""
+status_re=".*\"Status\": \"(\w+)\".*"
+deployid_re=".*\"DeploymentId\": \"([a-zA-Z0-9\-]+)\""
+
+# Initiate deployment using aws cli
+DEPLOY=`aws opsworks --region="${1}" create-deployment --stack-id="${2}" --app-id="${3}" --command="{\"Name\":\"deploy\"}"`
+# check response for deployment-id
+if [[ $DEPLOY =~ $deployid_re ]]
+then
+  DEPLOY_ID=${BASH_REMATCH[1]}
+  echo "Deployment initiated, ID: ${DEPLOY_ID}"
+else
+  echo "Deployment unsuccessful, response from AWS CLI: ${DEPLOY}"
+  exit 1
+fi
+
+while [ $SUCCESS -ne 1 ] && [ $RETRY_COUNT -lt $RETRY_LIMIT  ]
+do
+  echo "Attempt #${RETRY_COUNT} of ${RETRY_LIMIT}...";
+  RESULTS=`aws opsworks --region ${AWS_REGION} describe-deployments --deployment-ids ${DEPLOY_ID}`
+
+  if [[ $RESULTS =~ $status_re ]]
+  then
+    LAST_STATUS=${BASH_REMATCH[1]}
+    echo "Current Status: ${LAST_STATUS}";
+    if [ "${LAST_STATUS}" == "successful" ]
+    then
+      SUCCESS=1
+      break
+    elif [ "${LAST_STATUS}" == "failed" ]
+    then
+      break
+    fi
+  fi
+
+  sleep $WAIT_TIME;
+  ((RETRY_COUNT++))
+done
+
+if [ $SUCCESS -eq 1 ]
+then
+  echo "Deployment completed successfully!"
+  exit 0
+else
+  echo "Deployment did not complete successfully, status: ${LAST_STATUS}"
+  exit 2
+fi

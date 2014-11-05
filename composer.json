@@ -1,0 +1,15 @@
+{
+    "name": "silinternational/opsworks-deploy",
+    "description": "Shell script to initiate and monitor OpsWorks application deployments using AWC CLI scripts",
+    "type": "library",
+    "keywords": [
+        "aws",
+        "opsworks",
+        "amazon web services"
+    ],
+    "homepage": "https://github.com/silinternational/opsworks-deploy",
+    "license": "MIT",
+    "bin": [
+        "opsworks-deploy"
+    ]
+}
