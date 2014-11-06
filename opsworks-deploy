@@ -29,7 +29,7 @@ fi
 while [ $SUCCESS -ne 1 ] && [ $RETRY_COUNT -lt $RETRY_LIMIT  ]
 do
   echo "Attempt #${RETRY_COUNT} of ${RETRY_LIMIT}...";
-  RESULTS=`aws opsworks --region ${AWS_REGION} describe-deployments --deployment-ids ${DEPLOY_ID}`
+  RESULTS=`aws opsworks --region ${1} describe-deployments --deployment-ids ${DEPLOY_ID}`
 
   if [[ $RESULTS =~ $status_re ]]
   then
