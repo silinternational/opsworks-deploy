@@ -6,8 +6,8 @@
 ## Second to be stack-id
 ## Third to be application-id
 
-RETRY_LIMIT=30
-WAIT_TIME=10s
+RETRY_LIMIT=60
+WAIT_TIME=20s
 RETRY_COUNT=0
 SUCCESS=0
 LAST_STATUS=""
